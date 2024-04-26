@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot</title>
+  </head>
+  <body>
+    <h1>Chatbot</h1>
+    <input
+      type="text"
+      id="userInput"
+      placeholder="Say something..."
+      autocomplete="off"
+    />
+    <button onclick="sendMessage()">Send</button>
+    <div id="chat"></div>
+
+    <script>
+      async function sendMessage() {
+        const inputField = document.getElementById("userInput");
+        const userText = inputField.value;
+        inputField.value = "";
+
+        try {
+          const response = await fetch(
+            `http://localhost:8080/chatbot?prompt=${encodeURIComponent(
+              userText
+            )}`
+          );
+          const data = await response.json(); // Parse the JSON response
+          const chatDiv = document.getElementById("chat");
+          chatDiv.innerHTML += `<div>You: ${userText}</div>`;
+          if (
+            data.choices &&
+            data.choices.length > 0 &&
+            data.choices[0].message
+          ) {
+            const message = data.choices[0].message.content;
+            chatDiv.innerHTML += `<div>Bot: ${message}</div>`;
+          } else {
+            chatDiv.innerHTML += `<div>Bot: Error or unexpected response format</div>`;
+          }
+        } catch (error) {
+          console.error("Error fetching response:", error);
+          const chatDiv = document.getElementById("chat");
+          chatDiv.innerHTML += `<div>Bot: Error fetching response.</div>`;
+        }
+      }
+    </script>
+  </body>
+</html>
